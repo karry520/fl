@@ -6,7 +6,7 @@ if (CMAKE_COMPILER_IS_GNUCXX AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 8.0)
 endif ()
 
 
-list(APPEND CMAKE_MODULE_PATH "../ABY/cmake")
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/ABY/cmake")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
 
@@ -38,9 +38,9 @@ elseif (NOT ENCRYPTO_utils_FOUND AND NOT TARGET ENCRYPTO_utils::encrypto_utils)
         find_package(Git REQUIRED)
         message("initialize Git submodule: extern/ENCRYPTO_utils")
         execute_process(COMMAND git submodule update --init extern/ENCRYPTO_utils
-                WORKING_DIRECTORY "../..")
+                WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}")
     endif ()
-    add_subdirectory(../ABY/extern/ENCRYPTO_utils)
+    add_subdirectory(ABY/extern/ENCRYPTO_utils)
 endif ()
 
 find_package(OTExtension QUIET)
@@ -52,17 +52,17 @@ elseif (NOT OTExtension_FOUND AND NOT TARGET OTExtension::otextension)
         find_package(Git REQUIRED)
         message("initialize Git submodule: extern/OTExtension")
         execute_process(COMMAND git submodule update --init extern/OTExtension
-                WORKING_DIRECTORY "../..")
+                WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}")
     endif ()
-    add_subdirectory(../ABY/extern/OTExtension)
+    add_subdirectory(ABY/extern/OTExtension)
 endif ()
 
 find_package(GMP REQUIRED)
 find_package(Threads REQUIRED)
 find_package(Boost 1.66.0 REQUIRED COMPONENTS thread system)
 
-add_subdirectory(../ABY/src/abycore)
-add_subdirectory(../pybind11)
+add_subdirectory(ABY/src/abycore)
+add_subdirectory(pybind11)
 
-pybind11_add_module(KD kd.cpp kd_aby.cpp)
+pybind11_add_module(KD KD_lib/kd.cpp KD_lib/kd_aby.cpp)
 target_link_libraries(KD PRIVATE ABY::aby)
