@@ -1,0 +1,6 @@
+clear_avg_acc_worker
+0 0.4113 0.604 0.6832 0.7182 0.7269 
+clear_avg_acc_worker
+0 0.3212 0.5832 0.6402 0.6949 0.7203 
+clear_avg_acc_worker
+0 0.2984 0.5894 0.66 0.704 0.7127 

@@ -1,0 +1,6 @@
+[submodule "Lib/ABY"]
+	path = Lib/ABY
+	url = https://github.com/encryptogroup/ABY
+[submodule "Lib/pybind11"]
+	path = Lib/pybind11
+	url = https://github.com/pybind/pybind11
