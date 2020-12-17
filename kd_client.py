@@ -4,6 +4,20 @@ from Common.Grpc.fl_grpc_pb2 import IdxRequest_uint32, GradRequest_int32
 
 import numpy as np
 
+import torch
+from torch import nn
+
+import Common.config as config
+
+from Common.Model.LeNet import LeNet
+from Common.Utils.data_loader import load_data_fashion_mnist
+from Common.Utils.set_log import setup_logging
+
+import grpc
+from Common.Grpc.fl_grpc_pb2_grpc import FL_GrpcStub
+
+import argparse
+
 
 class KDClient(WorkerBase):
     def __init__(self, client_id, model, loss_func, train_iter, test_iter, config, optimizer, stub1, stub2):
@@ -43,7 +57,8 @@ class KDClient(WorkerBase):
         share_idx1 = np.random.randint(2, size=self._grad_len).tolist()
         share_idx2 = np.array(np.logical_xor(grad_idx, share_idx1), dtype='int').tolist()
 
-        idx_upd_res1 = self.stub1.UpdateIdx_uint32.future(IdxRequest_uint32(id=self.client_id, idx_ori=encode(share_idx1)))
+        idx_upd_res1 = self.stub1.UpdateIdx_uint32.future(
+            IdxRequest_uint32(id=self.client_id, idx_ori=encode(share_idx1)))
         idx_upd_res2 = self.stub2.UpdateIdx_uint32(IdxRequest_uint32(id=self.client_id, idx_ori=encode(share_idx2)))
         print("update index")
         return idx_upd_res1.result().idx_upd, idx_upd_res2.idx_upd
@@ -57,7 +72,42 @@ class KDClient(WorkerBase):
         share_grad1 = np.random.randint(1000, size=len(idx_upd))
         share_grad2 = grad_top - share_grad1
 
-        grad_upd_res1 = self.stub1.UpdateGrad_int32.future(GradRequest_int32(id=self.client_id, grad_ori=share_grad1.tolist()))
+        grad_upd_res1 = self.stub1.UpdateGrad_int32.future(
+            GradRequest_int32(id=self.client_id, grad_ori=share_grad1.tolist()))
         grad_upd_res2 = self.stub2.UpdateGrad_int32(GradRequest_int32(id=self.client_id, grad_ori=share_grad2.tolist()))
         print("update grad")
         return grad_upd_res1.result().grad_upd, grad_upd_res2.grad_upd
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='clear_dense_client')
+    parser.add_argument('-i', type=int, help="client's id")
+    parser.add_argument('-t', type=int, default=10, help="train times locally")
+
+    args = parser.parse_args()
+
+    yaml_path = 'Log/log.yaml'
+    setup_logging(default_path=yaml_path)
+
+    model = LeNet()
+    batch_size = 512
+    train_iter, test_iter = load_data_fashion_mnist(batch_size=batch_size, root='Data/FashionMNIST')
+    lr = 0.001
+    optimizer = torch.optim.Adam(model.parameters(), lr=lr)
+    loss_func = nn.CrossEntropyLoss()
+
+    target1 = config.server1_address + ":" + str(config.port1)
+    target2 = config.server2_address + ":" + str(config.port2)
+
+    with grpc.insecure_channel(target1) as channel1:
+        with grpc.insecure_channel(target2) as channel2:
+            print("connect success!")
+
+            stub1 = FL_GrpcStub(channel1)
+            stub2 = FL_GrpcStub(channel2)
+
+            client = KDClient(client_id=args.i, model=model, loss_func=loss_func, train_iter=train_iter,
+                              test_iter=test_iter, config=config, optimizer=optimizer, stub1=stub1, stub2=stub2)
+
+            client.fl_train(times=args.t)
+            client.write_acc_record(fpath="Eva/kd_acc.txt", info="kd_worker")

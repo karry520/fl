@@ -1,6 +1,9 @@
 import threading
 import numpy as np
-from Common.Grpc.fl_grpc_pb2_grpc import FL_GrpcServicer
+from Common.Grpc.fl_grpc_pb2_grpc import FL_GrpcServicer, add_FL_GrpcServicer_to_server
+from concurrent import futures
+import grpc
+import time
 
 con = threading.Condition()
 num = 0
@@ -34,3 +37,17 @@ class FlGrpcServer(FL_GrpcServicer):
         con.release()
 
         return data_upd
+
+    def start(self):
+        server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
+        add_FL_GrpcServicer_to_server(self, server)
+
+        target = self.address + ":" + str(self.port)
+        server.add_insecure_port(target)
+        server.start()
+
+        try:
+            while True:
+                time.sleep(60 * 60 * 24)
+        except KeyboardInterrupt:
+            server.stop(0)

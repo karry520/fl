@@ -1,13 +1,9 @@
 from Common.Server.fl_grpc_server import FlGrpcServer
 from Common.Grpc.fl_grpc_pb2 import GradResponse_float
-from Common.Grpc.fl_grpc_pb2_grpc import add_FL_GrpcServicer_to_server
 from Common.Handler.handler import Handler
 
-from concurrent import futures
-
 import Common.config as config
-import grpc
-import time
+
 import numpy as np
 
 
@@ -24,20 +20,6 @@ class ClearDenseServer(FlGrpcServer):
         print("have received:", data_dict.keys())
         rst = super().process(dict_data=data_dict, handler=self.handler.computation)
         return GradResponse_float(grad_upd=rst)
-
-    def start(self):
-        server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
-        add_FL_GrpcServicer_to_server(self, server)
-
-        target = self.address + ":" + str(self.port)
-        server.add_insecure_port(target)
-        server.start()
-
-        try:
-            while True:
-                time.sleep(60 * 60 * 24)
-        except KeyboardInterrupt:
-            server.stop(0)
 
 
 class AvgGradientHandler(Handler):
