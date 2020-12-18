@@ -65,8 +65,8 @@ std::vector<uint8_t> kd_sru(bool role, std::vector<uint8_t> *idx, uint32_t num_w
         }
     } else {
         for (int i = 0; i < num_workers; ++i) {
-            s_vec1[i] = bc->PutSIMDINGate(length, idx->data() + i * length, bitlen, CLIENT);
-            s_vec2[i] = bc->PutDummySIMDINGate(length, bitlen);
+            s_vec2[i] = bc->PutSIMDINGate(length, idx->data() + i * length, bitlen, CLIENT);
+            s_vec1[i] = bc->PutDummySIMDINGate(length, bitlen);
         }
     }
 
@@ -154,10 +154,10 @@ kd_top(bool role, std::vector<uint32_t> *grad, std::vector<uint32_t> *fgrad, uin
 
     } else {
         for (int i = 0; i < num_workers; i++) {
-            st_vec1[i] = ac->PutSIMDINGate(k, grad->data() + i * k, gbitlen, CLIENT);
-            st_fvec1[i] = ac->PutSIMDINGate(k, fgrad->data() + i * k, gbitlen, CLIENT);
-            st_vec2[i] = ac->PutDummySIMDINGate(k, gbitlen);
-            st_fvec2[i] = ac->PutDummySIMDINGate(k, gbitlen);
+            st_vec2[i] = ac->PutSIMDINGate(k, grad->data() + i * k, gbitlen, CLIENT);
+            st_fvec2[i] = ac->PutSIMDINGate(k, fgrad->data() + i * k, gbitlen, CLIENT);
+            st_vec1[i] = ac->PutDummySIMDINGate(k, gbitlen);
+            st_fvec1[i] = ac->PutDummySIMDINGate(k, gbitlen);
         }
 
     }
