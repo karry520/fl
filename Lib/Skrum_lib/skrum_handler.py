@@ -85,16 +85,15 @@ class SkrumHandler():
         trs_length = len(data_trans)
         upd_grad_cpp = m.VectoruInt32(data_trans)
 
-        test = m.skrum_secp(self.role, upd_grad_cpp, trs_length)
+        rst_from_s2 = []
+        rst_from_s2 += m.skrum_secp(self.role, upd_grad_cpp, trs_length)
+        print(data)
+        sec_p = np.array(rst_from_s2[-self.num_workers:]).reshape((self.num_workers, -1))
+        s2_grad = np.array(rst_from_s2[:length], dtype='int16')
+        ddd = np.array((data * sec_p / (self.f + 1)).sum(axis=0), dtype='int16')
+        print(ddd + s2_grad)
+        return []
 
-        return test
-
-    def computation_dis(self):
-        pass
-
-
-    def computation(self, in_data):
-        pass
 
     def init_skrum_aby(self):
         m.init_skrum_aby(self.address, self.port, self.role)

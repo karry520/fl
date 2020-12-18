@@ -11,7 +11,7 @@ hander.init_skrum_aby()
 
 idx = [6, 6, 6, 5, 0, 0, 1, 1, 0, 6, 6, 6, 5, 0, 0, 1, 1, 2, 1, 5]
 
-print("idx:", len(idx))
+print("idx:", idx)
 rst = hander.computation_dis(data_in=idx)
 print("rst:", rst)
 

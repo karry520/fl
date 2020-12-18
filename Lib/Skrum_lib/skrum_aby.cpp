@@ -130,7 +130,7 @@ skrum_secp(bool role, std::vector <uint32_t> *data, uint32_t length) {
         s_data_y = ac->PutSIMDINGate(length, data->data(), bitlen, CLIENT);
     }
 
-    share *s_out = ac->PutOUTGate(s_data_x, ALL);
+    share *s_out = ac->PutOUTGate(s_data_y, ALL);
 
     skrum_party->ExecCircuit();
 
