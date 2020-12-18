@@ -41,8 +41,9 @@ class SkrumHandler():
         in_sign = m.VectoruInt32(sign_bit)
         rst += m.skrum_mul(self.role, in_d, in_sign, length, num_dis)
 
+        data_trans = [0 for i in range(self.num_workers + length)]
 
-        if (self.role != True):
+        if self.role != True:
 
             s1_data = np.array(rst).reshape((3, -1))
             s1_sub = s1_data[0, :] ** 2
@@ -65,17 +66,32 @@ class SkrumHandler():
 
             for i in range(self.num_workers):
                 upd_grad_table += [np.argpartition(score_table[i, :], self.f + 1)[:self.f + 1].tolist()]
-                grad_score += [score_table[i, :][np.argpartition(score_table[i, :], self.f + 1)[:self.f + 1]].sum(axis=0)]
+                grad_score += [
+                    score_table[i, :][np.argpartition(score_table[i, :], self.f + 1)[:self.f + 1]].sum(axis=0)]
 
             update_idx = np.argmin(grad_score)
 
             upd_set = upd_grad_table[update_idx]
-            sec_vec = np.zeros(self.num_workers, dtype='int')
+            sec_vec = np.zeros((self.num_workers, 1), dtype='int')
             for i in upd_set:
-                sec_vec[i] = 1
-            
+                sec_vec[i][0] = 1
+            update_grad = np.array((data * sec_vec / (self.f + 1)).sum(axis=0), dtype='int16')
 
-        return rst
+            data_trans = update_grad.tolist()
+            data_trans += sec_vec.flatten().tolist()
+
+        print("data_trans:", data_trans)
+
+        trs_length = len(data_trans)
+        upd_grad_cpp = m.VectoruInt32(data_trans)
+
+        test = m.skrum_secp(self.role, upd_grad_cpp, trs_length)
+
+        return test
+
+    def computation_dis(self):
+        pass
+
 
     def computation(self, in_data):
         pass
@@ -85,5 +101,3 @@ class SkrumHandler():
 
     def shutdown_skrum_aby(self):
         m.shutdown_skrum_aby()
-
-
