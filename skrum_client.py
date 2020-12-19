@@ -33,7 +33,7 @@ class SkrumClient(WorkerBase):
         gradients = np.array(gradients) * self.config.gradient_frac
         gradients = np.array(gradients, dtype='int')
 
-        share_grad1 = np.random.randint(1000, size=len(gradients))
+        share_grad1 = np.random.randint(100, size=len(gradients))
         share_grad2 = gradients - share_grad1
 
         grad_upd_rst1 = self.stub1.UpdateGrad_int32.future(

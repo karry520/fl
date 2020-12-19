@@ -50,7 +50,7 @@ class KDServer(FlGrpcServer):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='clear_dense_client')
+    parser = argparse.ArgumentParser(description='clear_dense_server')
     parser.add_argument('-r', type=int, default=0, help="server's role")
     args = parser.parse_args()
 

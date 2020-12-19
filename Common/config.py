@@ -8,7 +8,7 @@ f = 1
 
 topk = 40
 
-gradient_frac = 2 ** 10
+gradient_frac = 2 ** 20
 gradient_rand = 2 ** 8
 
 server1_address = "127.0.0.1"
